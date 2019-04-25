@@ -46,8 +46,6 @@ louds-rs is continuously tested with these Rust versions in Travis CI:
 
 - 1.33.0
 - Latest stable version
-- Beta version
-- Nightly build
 
 So it expectedly works with Rust 1.33.0 and any newer versions.
 
