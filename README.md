@@ -26,6 +26,54 @@ louds-rs = "0.1"  # NOTE: Replace to latest minor version.
 ```
 
 ### Usage Overview
+Say we want to hold the following tree structure in minimum length of bits.
+
+```
+(1)
+ |
+ |---+---+
+ |   |   |
+(2) (3) (4)
+ |       |
+ |       |---+-----+
+ |       |   |     |
+(5)     (6) (7)   (8)
+             |     |
+             |     |----+
+             |     |    |
+            (9)   (10) (11)
+```
+
+This tree has NodeNum (node number of 1-origin, assigned from left node to right & top to bottom) and edges.
+With LOUDS, this tree is represented as the following LBS (LOUDS Bit String).
+
+```
+NodeNum       | 0 (virtual root) | 1          | 2    | 3 | 4          | 5 | 6 | 7    | 8       | 9 | 10 | 11 |
+LBS           | 1  0             | 1  1  1  0 | 1  0 | 0 | 1  1  1  0 | 0 | 0 | 1  0 | 1  1  0 | 0 | 0  | 0  |
+Child NodeNum | 1  -             | 2  3  4  - | 5  - | - | 6  7  8  - | - | - | 9  - | 10 11 - | - | -  | -  |
+Index         | 0  1             | 2  3  4  5 | 6  7 | 8 | 9  10 11 12| 13| 14| 15 16| 17 18 19| 20| 21 | 22 |
+```
+
+The same tree is represented as follows using index.
+
+```
+<0>
+ |
+ |---+---+
+ |   |   |
+<2> <3> <4>
+ |       |
+ |       |---+-----+
+ |       |   |     |
+<6>     <9> <10>  <11>
+             |     |
+             |     |----+
+             |     |    |
+            <15>  <17> <18>
+```
+
+Then, create this tree structure with `Louds` and call operations to it.
+
 ```rust
 use louds_rs::{Louds, LoudsIndex, LoudsNodeNum};
 
