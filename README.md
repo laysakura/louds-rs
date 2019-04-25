@@ -46,10 +46,22 @@ assert_eq!(louds.child_to_parent(&index11), LoudsNodeNum::new(4));
 ```
 
 ## Features
-(TBD)
+- **Arbitrary length support with minimum working memory**: louds-rs provides virtually _arbitrary size_ of LOUDS. It is carefully designed to use as small memory space as possible.
+- **Based on [fid-rs](https://crates.io/crates/fid-rs)**, which is fast, parallelized, and memory efficient. It provides fast construction (`Louds::from()`).
+- **Latest benchmark results are always accessible**: louds-rs is continuously benchmarked in Travis CI using [Criterion.rs](https://crates.io/crates/criterion). Graphical benchmark results are published [here](https://laysakura.github.io/louds-rs/criterion/report/).
 
 ### Complexity
-(TBD)
+When the number of nodes in the tree represented as LOUDS is _N_:
+
+| Operation | Time-complexity | Space-complexity |
+|-----------|-----------------|------------------|
+| [Louds::from::<&str>()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.louds.html#implementations) | _O(N)_ | _N + o(N)_ |
+| [node_num_to_index()](https://laysakura.github.io/louds-rs/louds_rs/struct.Louds.html#method.node_num_to_index) | _O()_ | _N + o(N)_ |
+| [index_to_node_num()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.index_to_node_num) | _O(1)_ | _O(1)_ |
+| [child_to_parent()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.child_to_parent) | _O(1)_ | _O(1)_ |
+| [parent_to_children()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O( max(log N, <u>max num of children a node has</u>) )_ | _O( max(log N, <u>max num of children a node has</u>) )_ |
+
+(`node_num_to_index()` and `child_to_parent()` use [Fid::select()](https://laysakura.github.io/fid-rs/fid_rs/fid/struct.Fid.html#method.select). `index_to_node_num()` and `parent_to_children()` use [rank()](https://laysakura.github.io/fid-rs/fid_rs/fid/struct.Fid.html#method.rank)).
 
 ## Versions
 louds-rs uses [semantic versioning](http://semver.org/spec/v2.0.0.html).
