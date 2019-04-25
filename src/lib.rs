@@ -20,7 +20,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! louds-rs = "0.1"
+//! louds-rs = "0.1"  # NOTE: Replace to latest minor version.
 //! ```
 //!
 //! ## Usage Overview
