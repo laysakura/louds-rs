@@ -32,3 +32,6 @@
 //!
 //! ## Complexity
 //! (TBD)
+
+pub use louds::{Louds, LoudsIndex, LoudsNodeNum};
+pub mod louds;
