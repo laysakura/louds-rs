@@ -20,18 +20,94 @@
 //!
 //! ```toml
 //! [dependencies]
-//! louds-rs = "0.1"
+//! louds-rs = "0.1"  # NOTE: Replace to latest minor version.
 //! ```
 //!
 //! ## Usage Overview
-//! (TBD)
+//! Say we want to hold the following tree structure in minimum length of bits.
 //!
+//! ```text
+//! (1)
+//!  |
+//!  |---+---+
+//!  |   |   |
+//! (2) (3) (4)
+//!  |       |
+//!  |       |---+-----+
+//!  |       |   |     |
+//! (5)     (6) (7)   (8)
+//!              |     |
+//!              |     |----+
+//!              |     |    |
+//!             (9)   (10) (11)
+//! ```
+//!
+//! This tree has NodeNum (node number of 1-origin, assigned from left node to right & top to bottom) and edges.
+//! With LOUDS, this tree is represented as the following LBS (LOUDS Bit String).
+//!
+//! ```text
+//! NodeNum       | 0 (virtual root) | 1          | 2    | 3 | 4          | 5 | 6 | 7    | 8       | 9 | 10 | 11 |
+//! LBS           | 1  0             | 1  1  1  0 | 1  0 | 0 | 1  1  1  0 | 0 | 0 | 1  0 | 1  1  0 | 0 | 0  | 0  |
+//! Child NodeNum | 1  -             | 2  3  4  - | 5  - | - | 6  7  8  - | - | - | 9  - | 10 11 - | - | -  | -  |
+//! Index         | 0  1             | 2  3  4  5 | 6  7 | 8 | 9  10 11 12| 13| 14| 15 16| 17 18 19| 20| 21 | 22 |
+//! ```
+//!
+//! The same tree is represented as follows using index.
+//!
+//! ```text
+//! <0>
+//!  |
+//!  |---+---+
+//!  |   |   |
+//! <2> <3> <4>
+//!  |       |
+//!  |       |---+-----+
+//!  |       |   |     |
+//! <6>     <9> <10>  <11>
+//!              |     |
+//!              |     |----+
+//!              |     |    |
+//!             <15>  <17> <18>
+//! ```
+//!
+//! Then, create this tree structure with `Louds` and call operations to it.
+//!
+//! ```rust
+//! use louds_rs::{Louds, LoudsIndex, LoudsNodeNum};
+//!
+//! // Construct from LBS.
+//! let s = "10_1110_10_0_1110_0_0_10_110_0_0_0";
+//! let louds = Louds::from(s);
+//!
+//! // LoudsNodeNum <-> LoudsIndex
+//! let node8 = LoudsNodeNum::new(8);
+//! let index11 = louds.node_num_to_index(&node8);
+//! assert_eq!(louds.index_to_node_num(&index11), node8);
+//!
+//! // Search for children.
+//! assert_eq!(louds.parent_to_children(&node8), vec!(LoudsIndex::new(17), LoudsIndex::new(18)));
+//!
+//! // Search for parent.
+//! assert_eq!(louds.child_to_parent(&index11), LoudsNodeNum::new(4));
+//! ```
 //!
 //! # Features
-//! (TBD)
+//! - **Arbitrary length support with minimum working memory**: louds-rs provides virtually _arbitrary size_ of LOUDS. It is carefully designed to use as small memory space as possible.
+//! - **Based on [fid-rs](https://crates.io/crates/fid-rs)**, which is fast, parallelized, and memory efficient. It provides fast construction (`Louds::from()`).
+//! - **Latest benchmark results are always accessible**: louds-rs is continuously benchmarked in Travis CI using [Criterion.rs](https://crates.io/crates/criterion). Graphical benchmark results are published [here](https://laysakura.github.io/louds-rs/criterion/report/).
 //!
 //! ## Complexity
-//! (TBD)
+//! When the number of nodes in the tree represented as LOUDS is _N_:
+//!
+//! | Operation | Time-complexity | Space-complexity |
+//! |-----------|-----------------|------------------|
+//! | [Louds::from::<&str>()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.louds.html#implementations) | _O(N)_ | _N + o(N)_ |
+//! | [node_num_to_index()](https://laysakura.github.io/louds-rs/louds_rs/struct.Louds.html#method.node_num_to_index) | _O()_ | _N + o(N)_ |
+//! | [index_to_node_num()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.index_to_node_num) | _O(1)_ | _O(1)_ |
+//! | [child_to_parent()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.child_to_parent) | _O(1)_ | _O(1)_ |
+//! | [parent_to_children()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O( max(log N, <u>max num of children a node has</u>) )_ | _O( max(log N, <u>max num of children a node has</u>) )_ |
+//!
+//! (`node_num_to_index()` and `child_to_parent()` use [Fid::select()](https://laysakura.github.io/fid-rs/fid_rs/fid/struct.Fid.html#method.select). `index_to_node_num()` and `parent_to_children()` use [rank()](https://laysakura.github.io/fid-rs/fid_rs/fid/struct.Fid.html#method.rank)).
 
 pub use louds::{Louds, LoudsIndex, LoudsNodeNum};
 pub mod louds;

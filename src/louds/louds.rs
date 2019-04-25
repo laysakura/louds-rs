@@ -26,8 +26,8 @@ impl From<&str> for Louds {
                 _ => panic!("not allowed"),
             })
             .collect();
-        Self::validate_lbs(&s);
         let fid = Fid::from(s.as_str());
+        Self::validate_lbs(&fid);
         Louds { lbs: fid }
     }
 }
@@ -89,18 +89,18 @@ impl Louds {
         children_index.iter().map(|i| LoudsIndex::new(*i)).collect()
     }
 
-    /// Checks if `s` satisfy the LBS's necessary and sufficient condition:
-    fn validate_lbs(s: &str) {
-        assert!(s.starts_with("10"));
+    /// Checks if `lbs` satisfy the LBS's necessary and sufficient condition:
+    fn validate_lbs(lbs: &Fid) {
+        assert_eq!(lbs[0], true);
+        assert_eq!(lbs[1], false);
 
         let (mut cnt0, mut cnt1) = (0u64, 0u64);
-        for (i, ch) in s.chars().enumerate() {
-            match ch {
-                '0' => cnt0 += 1,
-                '1' => cnt1 += 1,
-                '_' => (),
-                c => panic!("LBS contains invalid character '{}'", c),
-            }
+        for (i, bit) in lbs.iter().enumerate() {
+            if bit {
+                cnt1 += 1
+            } else {
+                cnt0 += 1
+            };
             assert!(
                 cnt0 <= cnt1 + 1,
                 "At index {}, the number of '0' ({}) == (the number of '1' ({})) + 2.",
@@ -109,7 +109,6 @@ impl Louds {
                 cnt1,
             );
         }
-
         assert_eq!(cnt0, cnt1 + 1);
     }
 
@@ -128,6 +127,7 @@ impl Louds {
 #[cfg(test)]
 mod validate_lbs_success_tests {
     use crate::Louds;
+    use fid_rs::Fid;
 
     macro_rules! parameterized_tests {
         ($($name:ident: $value:expr,)*) => {
@@ -135,7 +135,8 @@ mod validate_lbs_success_tests {
             #[test]
             fn $name() {
                 let s = $value;
-                Louds::validate_lbs(s);
+                let fid = Fid::from(s);
+                Louds::validate_lbs(&fid);
             }
         )*
         }
@@ -152,6 +153,7 @@ mod validate_lbs_success_tests {
 #[cfg(test)]
 mod validate_lbs_failure_tests {
     use crate::Louds;
+    use fid_rs::Fid;
 
     macro_rules! parameterized_tests {
         ($($name:ident: $value:expr,)*) => {
@@ -160,7 +162,8 @@ mod validate_lbs_failure_tests {
             #[should_panic]
             fn $name() {
                 let s = $value;
-                Louds::validate_lbs(s);
+                let fid = Fid::from(s);
+                Louds::validate_lbs(&fid);
             }
         )*
         }
