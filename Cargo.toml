@@ -1,0 +1,23 @@
+[package]
+name = "louds-rs"
+version = "0.1.0"
+authors = ["Sho Nakatani <lay.sakura@gmail.com>"]
+description = "High performance LOUDS (Level-Order Unary Degree Sequence) library"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/laysakura/louds-rs"
+homepage = "https://github.com/laysakura/louds-rs"
+keywords = ["louds", "succinct"] # up to 5 keywords, each keyword should have <= 20 chars
+categories = ["compression", "data-structures"]
+edition = "2018"
+
+[dependencies]
+rayon = "1.0"
+
+[dev-dependencies]
+criterion = "0.2"
+rand = "0.6"
+
+[[bench]]
+name = "bench"
+harness = false
