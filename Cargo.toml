@@ -1,6 +1,6 @@
 [package]
 name = "louds-rs"
-version = "0.1.1-alpha.0"
+version = "0.1.1"
 authors = ["Sho Nakatani <lay.sakura@gmail.com>"]
 description = "High performance LOUDS (Level-Order Unary Degree Sequence) library"
 readme = "README.md"

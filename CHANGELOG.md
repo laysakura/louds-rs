@@ -6,8 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v0.1.1] - 2019-04-26
+### Changed
+- Removed unused `rayon` dependency.
+
 ## [v0.1.0] - 2019-04-26
 Initial release.
 
-[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.1.0...v0.1.1
 [v0.1.0]: https://github.com/laysakura/louds-rs/compare/89fad3a...v0.1.0
