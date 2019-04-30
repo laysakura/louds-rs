@@ -17,7 +17,6 @@ impl From<&str> for Louds {
     /// - In the range of _[0, <u>length of LBS</u>)_;
     ///     - _<u>the number of '0'</u> == <u>the number of '1'</u> + 1_
     fn from(s: &str) -> Self {
-        // TODO validate by &[bool]
         let s: String = s
             .chars()
             .filter(|c| match c {
@@ -27,6 +26,20 @@ impl From<&str> for Louds {
             })
             .collect();
         let fid = Fid::from(s.as_str());
+        Self::validate_lbs(&fid);
+        Louds { lbs: fid }
+    }
+}
+
+impl From<&[bool]> for Louds {
+    /// Prepares for building [Louds](struct.Louds.html) from LBS (LOUDS Bit vector).
+    ///
+    /// It takes _O(log `bits`)_ time for validation.
+    ///
+    /// # Panics
+    /// Same as [Louds::from::<&str>()](struct.louds.html#implementations).
+    fn from(bits: &[bool]) -> Self {
+        let fid = Fid::from(bits);
         Self::validate_lbs(&fid);
         Louds { lbs: fid }
     }
