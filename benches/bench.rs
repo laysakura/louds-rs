@@ -26,39 +26,70 @@ mod louds {
 
     const NS: [u64; 5] = [1 << 11, 1 << 12, 1 << 13, 1 << 14, 1 << 15];
 
-    fn generate_binary_tree_lbs(n_nodes: u64) -> String {
+    fn generate_binary_tree_lbs_bits(n_nodes: u64) -> Vec<bool> {
         assert!(
             NS.iter().any(|n| n - 1 == n_nodes),
             "Only 2^m - 1 nodes (complete binary tree) is supported"
         );
 
-        let mut s = String::from("10");
+        let mut bits = vec![true, false];
 
         // Nodes
         for _ in 1..=(n_nodes / 2) {
-            s = format!("{}{}", s, "110");
+            bits.append(&mut vec![true, true, false]);
         }
 
         // Leaves
         for _ in (n_nodes / 2 + 1)..=(n_nodes) {
-            s = format!("{}{}", s, "0");
+            bits.push(false);
         }
 
-        s
+        bits
     }
 
-    pub fn builder_from_bit_string_benchmark(_: &mut Criterion) {
+    fn generate_binary_tree_lbs_string(n_nodes: u64) -> String {
+        generate_binary_tree_lbs_bits(n_nodes)
+            .iter()
+            .map(|bit| if *bit { '1' } else { '0' })
+            .collect()
+    }
+
+    pub fn from_bits_benchmark(_: &mut Criterion) {
         let times = 10;
 
         super::c().bench_function_over_inputs(
             &format!(
-                "[{}] LoudsBuilder::from_bit_string(\"...(bin tree of N nodes)\").build() {} times",
+                "[{}] Louds::from::<&[bool]>(&[...(bin tree of N nodes)]) {} times",
                 super::git_hash(),
                 times,
             ),
             move |b, &&n| {
                 b.iter_batched(
-                    || generate_binary_tree_lbs(n - 1),
+                    || generate_binary_tree_lbs_bits(n - 1),
+                    |bits| {
+                        for _ in 0..times {
+                            let _ = Louds::from(&bits[..]);
+                        }
+                    },
+                    BatchSize::SmallInput,
+                )
+            },
+            &NS,
+        );
+    }
+
+    pub fn from_str_benchmark(_: &mut Criterion) {
+        let times = 10;
+
+        super::c().bench_function_over_inputs(
+            &format!(
+                "[{}] Louds::from::<&str>(\"...(bin tree of N nodes)\") {} times",
+                super::git_hash(),
+                times,
+            ),
+            move |b, &&n| {
+                b.iter_batched(
+                    || generate_binary_tree_lbs_string(n - 1),
                     |s| {
                         for _ in 0..times {
                             let _ = Louds::from(s.as_str());
@@ -83,8 +114,8 @@ mod louds {
             move |b, &&n| {
                 b.iter_batched(
                     || {
-                        let s = generate_binary_tree_lbs(n - 1);
-                        Louds::from(s.as_str())
+                        let bits = generate_binary_tree_lbs_bits(n - 1);
+                        Louds::from(&bits[..])
                     },
                     |louds| {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
@@ -112,8 +143,8 @@ mod louds {
             move |b, &&n| {
                 b.iter_batched(
                     || {
-                        let s = generate_binary_tree_lbs(n - 1);
-                        Louds::from(s.as_str())
+                        let bits = generate_binary_tree_lbs_bits(n - 1);
+                        Louds::from(&bits[..])
                     },
                     |louds| {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
@@ -141,8 +172,8 @@ mod louds {
             move |b, &&n| {
                 b.iter_batched(
                     || {
-                        let s = generate_binary_tree_lbs(n - 1);
-                        Louds::from(s.as_str())
+                        let bits = generate_binary_tree_lbs_bits(n - 1);
+                        Louds::from(&bits[..])
                     },
                     |louds| {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
@@ -170,8 +201,8 @@ mod louds {
             move |b, &&n| {
                 b.iter_batched(
                     || {
-                        let s = generate_binary_tree_lbs(n - 1);
-                        Louds::from(s.as_str())
+                        let bits = generate_binary_tree_lbs_bits(n - 1);
+                        Louds::from(&bits[..])
                     },
                     |louds| {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
@@ -190,7 +221,8 @@ mod louds {
 
 criterion_group!(
     benches,
-    louds::builder_from_bit_string_benchmark,
+    louds::from_bits_benchmark,
+    louds::from_str_benchmark,
     louds::node_num_to_index_benchmark,
     louds::index_to_node_num_benchmark,
     louds::parent_to_children_benchmark,

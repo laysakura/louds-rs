@@ -93,6 +93,32 @@ assert_eq!(louds.parent_to_children(&node8), vec!(LoudsIndex::new(17), LoudsInde
 assert_eq!(louds.child_to_parent(&index11), LoudsNodeNum::new(4));
 ```
 
+### Constructors
+
+```rust
+use louds_rs::Louds;
+
+// Most human-friendly way: Louds::from::<&str>()
+let louds1 = Louds::from("10_1110_10_0_1110_0_0_10_110_0_0_0");
+
+// Simple way: Louds::from::<&[bool]>()
+let mut arr = vec![
+    true, false,
+    true, true, true, false,
+    true, false,
+    false,
+    true, true, true, false,
+    false,
+    false,
+    true, false,
+    true, true, false,
+    false,
+    false,
+    false,
+];
+let louds2 = Louds::from(&arr[..]);
+```
+
 ## Features
 - **Arbitrary length support with minimum working memory**: louds-rs provides virtually _arbitrary size_ of LOUDS. It is carefully designed to use as small memory space as possible.
 - **Based on [fid-rs](https://crates.io/crates/fid-rs)**, which is fast, parallelized, and memory efficient. It provides fast construction (`Louds::from()`).
@@ -104,6 +130,7 @@ When the number of nodes in the tree represented as LOUDS is _N_:
 | Operation | Time-complexity | Space-complexity |
 |-----------|-----------------|------------------|
 | [Louds::from::<&str>()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.louds.html#implementations) | _O(N)_ | _N + o(N)_ |
+| [Louds::from::<&[bool]>()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.louds.html#implementations) | _O(N)_ | _N + o(N)_ |
 | [node_num_to_index()](https://laysakura.github.io/louds-rs/louds_rs/struct.Louds.html#method.node_num_to_index) | _O()_ | _N + o(N)_ |
 | [index_to_node_num()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.index_to_node_num) | _O(1)_ | _O(1)_ |
 | [child_to_parent()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.child_to_parent) | _O(1)_ | _O(1)_ |
