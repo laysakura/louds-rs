@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v0.2.0] - 2019-05-01
+### Added
+- `Louds::from::<&[bool]>()` constructor.
+
 ## [v0.1.1] - 2019-04-26
 ### Changed
 - Removed unused `rayon` dependency.
@@ -13,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.1.0] - 2019-04-26
 Initial release.
 
-[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.1.1...HEAD
-[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.1.0...v0.1.1
+[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.2.0...HEAD
+[v0.2.0]: https://github.com/laysakura/louds-rs/compare/v0.1.1...v0.2.0
+[v0.1.1]: https://github.com/laysakura/louds-rs/compare/v0.1.0...v0.1.1
 [v0.1.0]: https://github.com/laysakura/louds-rs/compare/89fad3a...v0.1.0
