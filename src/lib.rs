@@ -127,9 +127,9 @@
 //!
 //! | Operation | Time-complexity | Space-complexity |
 //! |-----------|-----------------|------------------|
-//! | [Louds::from::<&str>()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.louds.html#implementations) | _O(N)_ | _N + o(N)_ |
-//! | [Louds::from::<&[bool]>()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.louds.html#implementations) | _O(N)_ | _N + o(N)_ |
-//! | [node_num_to_index()](https://laysakura.github.io/louds-rs/louds_rs/struct.Louds.html#method.node_num_to_index) | _O()_ | _N + o(N)_ |
+//! | [Louds::from::<&str>()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#implementations) | _O(N)_ | _N + o(N)_ |
+//! | [Louds::from::<&[bool]>()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#implementations) | _O(N)_ | _N + o(N)_ |
+//! | [node_num_to_index()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.node_num_to_index) | _O()_ | _N + o(N)_ |
 //! | [index_to_node_num()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.index_to_node_num) | _O(1)_ | _O(1)_ |
 //! | [child_to_parent()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.child_to_parent) | _O(1)_ | _O(1)_ |
 //! | [parent_to_children()](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O( max(log N, <u>max num of children a node has</u>) )_ | _O( max(log N, <u>max num of children a node has</u>) )_ |

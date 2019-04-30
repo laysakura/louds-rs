@@ -37,7 +37,7 @@ impl From<&[bool]> for Louds {
     /// It takes _O(log `bits`)_ time for validation.
     ///
     /// # Panics
-    /// Same as [Louds::from::<&str>()](struct.louds.html#implementations).
+    /// Same as [Louds::from::<&str>()](struct.Louds.html#implementations).
     fn from(bits: &[bool]) -> Self {
         let fid = Fid::from(bits);
         Self::validate_lbs(&fid);
