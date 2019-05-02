@@ -121,8 +121,7 @@ mod louds {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
                         // Tested function takes too short compared to build(). So loop many times.
                         for _ in 0..times {
-                            let node_num = LoudsNodeNum(n - 1);
-                            let _ = louds.node_num_to_index(&node_num);
+                            let _ = louds.node_num_to_index(&LoudsNodeNum(n - 1));
                         }
                     },
                     BatchSize::SmallInput,
