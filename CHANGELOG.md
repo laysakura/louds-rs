@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v0.4.0] - 2019-05-02
+### Changed
+- `Louds::node_num_to_index()` takes `LoudsNodeNum` instead of its reference.
+- `Louds::index_to_node_num()` takes `LoudsIndex` instead of its reference.
+- `Louds::child_to_parent()` takes `LoudsIndex` instead of its reference.
+- `Louds::parent_to_children()` takes `LoudsNodeNum` instead of its reference.
+
 ## [v0.3.0] - 2019-05-02
 ### Changed
 - `LoudsNodeNum` made into `Copy` tuple struct.
@@ -22,7 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.1.0] - 2019-04-26
 Initial release.
 
-[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.4.0...HEAD
+[v0.4.0]: https://github.com/laysakura/louds-rs/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/laysakura/louds-rs/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/laysakura/louds-rs/compare/v0.1.1...v0.2.0
 [v0.1.1]: https://github.com/laysakura/louds-rs/compare/v0.1.0...v0.1.1
