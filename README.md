@@ -11,7 +11,8 @@ High performance LOUDS (Level-Order Unary Degree Sequence) library.
 [Changelog](https://github.com/laysakura/louds-rs/blob/master/CHANGELOG.md)
 
 [![Build Status](https://travis-ci.com/laysakura/louds-rs.svg?branch=master)](https://travis-ci.com/laysakura/louds-rs)
-[![Crates.io](https://img.shields.io/crates/v/louds-rs.svg)](https://crates.io/crates/louds-rs)
+[![Crates.io Version](https://img.shields.io/crates/v/louds-rs.svg)](https://crates.io/crates/louds-rs)
+[![Crates.io Downloads](https://img.shields.io/crates/d/louds-rs.svg)](https://crates.io/crates/louds-rs)
 [![Minimum rustc version](https://img.shields.io/badge/rustc-1.33+-lightgray.svg)](https://github.com/laysakura/louds-rs#rust-version-supports)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/laysakura/louds-rs/blob/master/LICENSE-MIT)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](https://github.com/laysakura/louds-rs/blob/master/LICENSE-APACHE)
