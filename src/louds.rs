@@ -1,6 +1,4 @@
 mod louds;
-mod louds_index;
-mod louds_node_num;
 
 extern crate fid_rs;
 use fid_rs::Fid;
@@ -15,14 +13,10 @@ pub struct Louds {
     lbs: Fid,
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 /// Node number of [Louds](struct.Louds.html) tree.
-pub struct LoudsNodeNum {
-    value: u64,
-}
+pub struct LoudsNodeNum(pub u64);
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 /// Index of [Louds](struct.Louds.html) tree.
-pub struct LoudsIndex {
-    value: u64,
-}
+pub struct LoudsIndex(pub u64);

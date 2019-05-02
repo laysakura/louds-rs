@@ -82,15 +82,15 @@ let s = "10_1110_10_0_1110_0_0_10_110_0_0_0";
 let louds = Louds::from(s);
 
 // LoudsNodeNum <-> LoudsIndex
-let node8 = LoudsNodeNum::new(8);
+let node8 = LoudsNodeNum(8);
 let index11 = louds.node_num_to_index(&node8);
 assert_eq!(louds.index_to_node_num(&index11), node8);
 
 // Search for children.
-assert_eq!(louds.parent_to_children(&node8), vec!(LoudsIndex::new(17), LoudsIndex::new(18)));
+assert_eq!(louds.parent_to_children(&node8), vec!(LoudsIndex(17), LoudsIndex(18)));
 
 // Search for parent.
-assert_eq!(louds.child_to_parent(&index11), LoudsNodeNum::new(4));
+assert_eq!(louds.child_to_parent(&index11), LoudsNodeNum(4));
 ```
 
 ### Constructors
