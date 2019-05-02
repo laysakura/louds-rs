@@ -35,12 +35,12 @@ fn fuzzing_test() {
             eprintln!("NodeNum({:?})", raw_node_num);
 
             // index(node_num_to_index(node_num)) == node_num
-            let index = louds.node_num_to_index(&node_num);
-            assert_eq!(louds.index_to_node_num(&index), node_num);
+            let index = louds.node_num_to_index(node_num);
+            assert_eq!(louds.index_to_node_num(index), node_num);
 
             // `node_num`'s children have `node_num` as parent.
-            for child_index in louds.parent_to_children(&node_num) {
-                assert_eq!(louds.child_to_parent(&child_index), node_num);
+            for child_index in louds.parent_to_children(node_num) {
+                assert_eq!(louds.child_to_parent(child_index), node_num);
             }
         }
     }
