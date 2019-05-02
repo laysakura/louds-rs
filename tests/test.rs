@@ -31,7 +31,7 @@ fn fuzzing_test() {
         let louds = Louds::from(s.as_str());
 
         for raw_node_num in 1..=n_nodes {
-            let node_num = LoudsNodeNum::new(raw_node_num as u64);
+            let node_num = LoudsNodeNum(raw_node_num as u64);
             eprintln!("NodeNum({:?})", raw_node_num);
 
             // index(node_num_to_index(node_num)) == node_num

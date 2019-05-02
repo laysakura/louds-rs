@@ -121,7 +121,8 @@ mod louds {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
                         // Tested function takes too short compared to build(). So loop many times.
                         for _ in 0..times {
-                            let _ = louds.node_num_to_index(&LoudsNodeNum::new(n - 1));
+                            let node_num = LoudsNodeNum(n - 1);
+                            let _ = louds.node_num_to_index(&node_num);
                         }
                     },
                     BatchSize::SmallInput,
@@ -150,7 +151,7 @@ mod louds {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
                         // Tested function takes too short compared to build(). So loop many times.
                         for _ in 0..times {
-                            let _ = louds.index_to_node_num(&LoudsIndex::new(n / 2 + 1));
+                            let _ = louds.index_to_node_num(&LoudsIndex(n / 2 + 1));
                         }
                     },
                     BatchSize::SmallInput,
@@ -179,7 +180,7 @@ mod louds {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
                         // Tested function takes too short compared to build(). So loop many times.
                         for _ in 0..times {
-                            let _ = louds.parent_to_children(&LoudsNodeNum::new(n - 1));
+                            let _ = louds.parent_to_children(&LoudsNodeNum(n - 1));
                         }
                     },
                     BatchSize::SmallInput,
@@ -208,7 +209,7 @@ mod louds {
                         // iter_batched() does not properly time `routine` time when `setup` time is far longer than `routine` time.
                         // Tested function takes too short compared to build(). So loop many times.
                         for _ in 0..times {
-                            let _ = louds.child_to_parent(&LoudsIndex::new(n / 2 + 1));
+                            let _ = louds.child_to_parent(&LoudsIndex(n / 2 + 1));
                         }
                     },
                     BatchSize::SmallInput,

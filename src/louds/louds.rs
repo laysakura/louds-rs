@@ -49,13 +49,13 @@ impl Louds {
     /// # Panics
     /// `node_num` does not exist in this LOUDS.
     pub fn node_num_to_index(&self, node_num: &LoudsNodeNum) -> LoudsIndex {
-        assert!(node_num.value() > 0);
+        assert!(node_num.0 > 0);
 
-        let index = self.lbs.select(node_num.value()).expect(&format!(
+        let index = self.lbs.select(node_num.0).expect(&format!(
             "NodeNum({}) does not exist in this LOUDS",
-            node_num.value(),
+            node_num.0,
         ));
-        LoudsIndex::new(index)
+        LoudsIndex(index)
     }
 
     /// # Panics
@@ -63,8 +63,8 @@ impl Louds {
     pub fn index_to_node_num(&self, index: &LoudsIndex) -> LoudsNodeNum {
         self.validate_index(&index);
 
-        let node_num = self.lbs.rank(index.value());
-        LoudsNodeNum::new(node_num)
+        let node_num = self.lbs.rank(index.0);
+        LoudsNodeNum(node_num)
     }
 
     /// # Panics
@@ -72,20 +72,20 @@ impl Louds {
     /// - `index == 0`: (node#1 is root and doesn't have parent)
     pub fn child_to_parent(&self, index: &LoudsIndex) -> LoudsNodeNum {
         self.validate_index(&index);
-        assert!(index.value != 0, "node#1 is root and doesn't have parent");
+        assert!(index.0 != 0, "node#1 is root and doesn't have parent");
 
-        let parent_node_num = self.lbs.rank0(index.value());
-        LoudsNodeNum::new(parent_node_num)
+        let parent_node_num = self.lbs.rank0(index.0);
+        LoudsNodeNum(parent_node_num)
     }
 
     /// # Panics
     /// `node_num` does not exist in this LOUDS.
     pub fn parent_to_children(&self, node_num: &LoudsNodeNum) -> Vec<LoudsIndex> {
-        assert!(node_num.value() > 0);
+        assert!(node_num.0 > 0);
 
-        let parent_start_index = self.lbs.select0(node_num.value()).expect(&format!(
+        let parent_start_index = self.lbs.select0(node_num.0).expect(&format!(
             "NodeNum({}) does not exist in this LOUDS",
-            node_num.value(),
+            node_num.0,
         )) + 1;
 
         let mut children_index: Vec<u64> = vec![];
@@ -99,7 +99,7 @@ impl Louds {
             i += 1;
         }
 
-        children_index.iter().map(|i| LoudsIndex::new(*i)).collect()
+        children_index.iter().map(|i| LoudsIndex(*i)).collect()
     }
 
     /// Checks if `lbs` satisfy the LBS's necessary and sufficient condition:
@@ -129,8 +129,7 @@ impl Louds {
     /// `index` does not point to any node in this LOUDS.
     fn validate_index(&self, index: &LoudsIndex) {
         assert_eq!(
-            self.lbs[index.value()],
-            true,
+            self.lbs[index.0], true,
             "LBS[index={:?}] must be '1'",
             index,
         );
@@ -210,8 +209,8 @@ mod node_num_to_index_success_tests {
             fn $name() {
                 let (in_s, node_num, expected_index) = $value;
                 let louds = Louds::from(in_s);
-                let index = louds.node_num_to_index(&LoudsNodeNum::new(node_num));
-                assert_eq!(index, LoudsIndex::new(expected_index));
+                let index = louds.node_num_to_index(&LoudsNodeNum(node_num));
+                assert_eq!(index, LoudsIndex(expected_index));
             }
         )*
         }
@@ -250,7 +249,7 @@ mod node_num_to_index_failure_tests {
             fn $name() {
                 let (in_s, node_num) = $value;
                 let louds = Louds::from(in_s);
-                let _ = louds.node_num_to_index(&LoudsNodeNum::new(node_num));
+                let _ = louds.node_num_to_index(&LoudsNodeNum(node_num));
             }
         )*
         }
@@ -279,8 +278,8 @@ mod index_to_node_num_success_tests {
             fn $name() {
                 let (in_s, index, expected_node_num) = $value;
                 let louds = Louds::from(in_s);
-                let node_num = louds.index_to_node_num(&LoudsIndex::new(index));
-                assert_eq!(node_num, LoudsNodeNum::new(expected_node_num));
+                let node_num = louds.index_to_node_num(&LoudsIndex(index));
+                assert_eq!(node_num, LoudsNodeNum(expected_node_num));
             }
         )*
         }
@@ -319,7 +318,7 @@ mod index_to_node_num_failure_tests {
             fn $name() {
                 let (in_s, index) = $value;
                 let louds = Louds::from(in_s);
-                let _ = louds.index_to_node_num(&LoudsIndex::new(index));
+                let _ = louds.index_to_node_num(&LoudsIndex(index));
             }
         )*
         }
@@ -362,8 +361,8 @@ mod child_to_parent_success_tests {
             fn $name() {
                 let (in_s, index, expected_parent) = $value;
                 let louds = Louds::from(in_s);
-                let parent = louds.child_to_parent(&LoudsIndex::new(index));
-                assert_eq!(parent, LoudsNodeNum::new(expected_parent));
+                let parent = louds.child_to_parent(&LoudsIndex(index));
+                assert_eq!(parent, LoudsNodeNum(expected_parent));
             }
         )*
         }
@@ -397,7 +396,7 @@ mod child_to_parent_failure_tests {
             fn $name() {
                 let (in_s, index) = $value;
                 let louds = Louds::from(in_s);
-                let _ = louds.child_to_parent(&LoudsIndex::new(index));
+                let _ = louds.child_to_parent(&LoudsIndex(index));
             }
         )*
         }
@@ -436,7 +435,7 @@ mod child_to_parent_failure_tests {
             fn $name() {
                 let in_s = $value;
                 let louds = Louds::from(in_s);
-                let _ = louds.child_to_parent(&LoudsIndex::new(0));
+                let _ = louds.child_to_parent(&LoudsIndex(0));
             }
         )*
         }
@@ -460,8 +459,8 @@ mod parent_to_children_success_tests {
             fn $name() {
                 let (in_s, node_num, expected_children) = $value;
                 let louds = Louds::from(in_s);
-                let children = louds.parent_to_children(&LoudsNodeNum::new(node_num));
-                assert_eq!(children, expected_children.iter().map(|c| LoudsIndex::new(*c)).collect::<Vec<LoudsIndex>>());
+                let children = louds.parent_to_children(&LoudsNodeNum(node_num));
+                assert_eq!(children, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
             }
         )*
         }
@@ -500,7 +499,7 @@ mod parent_to_children_failure_tests {
             fn $name() {
                 let (in_s, node_num) = $value;
                 let louds = Louds::from(in_s);
-                let _ = louds.parent_to_children(&LoudsNodeNum::new(node_num));
+                let _ = louds.parent_to_children(&LoudsNodeNum(node_num));
             }
         )*
         }
