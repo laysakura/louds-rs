@@ -1,0 +1,11 @@
+group,function,value,sample_time_nanos,iteration_count
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,89606582.0,44
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,184734956.0,88
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,281881857.0,132
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,362405561.0,176
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,460371566.0,220
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,442296892.0,264
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,636819924.0,308
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,727098406.0,352
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,802334850.0,396
+"[940c17e] Louds::from::<&str>(""...(bin tree of N nodes)"") 10 times",,4096,904406720.0,440

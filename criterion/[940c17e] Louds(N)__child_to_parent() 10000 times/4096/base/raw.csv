@@ -1,0 +1,11 @@
+group,function,value,sample_time_nanos,iteration_count
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,72131161.0,71
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,143586180.0,142
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,217927452.0,213
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,286484666.0,284
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,359341862.0,355
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,432132065.0,426
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,504034150.0,497
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,576687201.0,568
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,654420296.0,639
+[940c17e] Louds(N)::child_to_parent() 10000 times,,4096,722997171.0,710

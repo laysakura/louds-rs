@@ -1,0 +1,17 @@
+var ALIASES = {};
+ALIASES["arrayvec"] = {};
+ALIASES["cfg_if"] = {};
+ALIASES["crossbeam_deque"] = {};
+ALIASES["crossbeam_epoch"] = {};
+ALIASES["crossbeam_utils"] = {};
+ALIASES["either"] = {};
+ALIASES["fid_rs"] = {};
+ALIASES["lazy_static"] = {};
+ALIASES["libc"] = {};
+ALIASES["louds_rs"] = {};
+ALIASES["memoffset"] = {};
+ALIASES["nodrop"] = {};
+ALIASES["num_cpus"] = {};
+ALIASES["rayon"] = {};
+ALIASES["rayon_core"] = {};
+ALIASES["scopeguard"] = {};
