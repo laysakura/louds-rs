@@ -1,4 +1,4 @@
-use super::{Louds, LoudsIndex, LoudsNodeNum};
+use super::{Louds, LoudsIndex, LoudsNodeNum, ChildIndexIter, ChildNodeIter};
 use fid_rs::Fid;
 
 impl From<&str> for Louds {
@@ -51,7 +51,7 @@ impl Louds {
     pub fn node_num_to_index(&self, node_num: LoudsNodeNum) -> LoudsIndex {
         assert!(node_num.0 > 0);
 
-        let index = self.lbs.select(node_num.0).expect(&format!(
+        let index = self.lbs.select(node_num.0).unwrap_or_else(|| panic!(
             "NodeNum({}) does not exist in this LOUDS",
             node_num.0,
         ));
@@ -81,25 +81,31 @@ impl Louds {
     /// # Panics
     /// `node_num` does not exist in this LOUDS.
     pub fn parent_to_children(&self, node_num: LoudsNodeNum) -> Vec<LoudsIndex> {
+        self.parent_to_children_indices(node_num).collect()
+    }
+
+    /// # Panics
+    /// `node_num` does not exist in this LOUDS.
+    pub fn parent_to_children_indices(&self, node_num: LoudsNodeNum) -> ChildIndexIter {
         assert!(node_num.0 > 0);
 
-        let parent_start_index = self.lbs.select0(node_num.0).expect(&format!(
+        let parent_start_index = self.lbs.select0(node_num.0).unwrap_or_else(|| panic!(
             "NodeNum({}) does not exist in this LOUDS",
             node_num.0,
         )) + 1;
+        ChildIndexIter { inner: self, index: parent_start_index }
+    }
 
-        let mut children_index: Vec<u64> = vec![];
-        let mut i = parent_start_index;
-        loop {
-            if self.lbs[i] == false {
-                break;
-            } else {
-                children_index.push(i);
-            }
-            i += 1;
-        }
+    /// # Panics
+    /// `node_num` does not exist in this LOUDS.
+    pub fn parent_to_children_nodes(&self, node_num: LoudsNodeNum) -> ChildNodeIter {
+        assert!(node_num.0 > 0);
 
-        children_index.iter().map(|i| LoudsIndex(*i)).collect()
+        let parent_start_index = self.lbs.select0(node_num.0).unwrap_or_else(|| panic!(
+            "NodeNum({}) does not exist in this LOUDS",
+            node_num.0,
+        )) + 1;
+        ChildNodeIter { inner: self, index: parent_start_index }
     }
 
     /// Checks if `lbs` satisfy the LBS's necessary and sufficient condition:
@@ -133,6 +139,32 @@ impl Louds {
             "LBS[index={:?}] must be '1'",
             index,
         );
+    }
+}
+
+impl<'a> Iterator for ChildIndexIter<'a> {
+    type Item = LoudsIndex;
+    fn next(&mut self) -> Option<Self::Item> {
+        if ! self.inner.lbs[self.index] {
+            None
+        } else {
+            let result = Some(LoudsIndex(self.index));
+            self.index += 1;
+            result
+        }
+    }
+}
+
+impl<'a> Iterator for ChildNodeIter<'a> {
+    type Item = LoudsNodeNum;
+    fn next(&mut self) -> Option<Self::Item> {
+        if ! self.inner.lbs[self.index] {
+            None
+        } else {
+            let result = Some(self.inner.index_to_node_num(LoudsIndex(self.index)));
+            self.index += 1;
+            result
+        }
     }
 }
 
@@ -459,7 +491,7 @@ mod parent_to_children_success_tests {
             fn $name() {
                 let (in_s, node_num, expected_children) = $value;
                 let louds = Louds::from(in_s);
-                let children = louds.parent_to_children(LoudsNodeNum(node_num));
+                let children: Vec<_> = louds.parent_to_children(LoudsNodeNum(node_num));
                 assert_eq!(children, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
             }
         )*
@@ -499,7 +531,7 @@ mod parent_to_children_failure_tests {
             fn $name() {
                 let (in_s, node_num) = $value;
                 let louds = Louds::from(in_s);
-                let _ = louds.parent_to_children(LoudsNodeNum(node_num));
+                let _: Vec<_> = louds.parent_to_children(LoudsNodeNum(node_num));
             }
         )*
         }
