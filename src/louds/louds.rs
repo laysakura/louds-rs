@@ -93,19 +93,17 @@ impl Louds {
             "NodeNum({}) does not exist in this LOUDS",
             node_num.0,
         )) + 1;
-        ChildIndexIter { inner: self, index: parent_start_index }
+        // let parent_end_index = self.lbs.select0(node_num.0 + 1).unwrap_or_else(|| panic!(
+        //     "NodeNum({}) does not exist in this LOUDS",
+        //     node_num.0 + 1,
+        // )) - 1;
+        ChildIndexIter { inner: self, index: parent_start_index, end: None }
     }
 
     /// # Panics
     /// `node_num` does not exist in this LOUDS.
     pub fn parent_to_children_nodes(&self, node_num: LoudsNodeNum) -> ChildNodeIter {
-        assert!(node_num.0 > 0);
-
-        let parent_start_index = self.lbs.select0(node_num.0).unwrap_or_else(|| panic!(
-            "NodeNum({}) does not exist in this LOUDS",
-            node_num.0,
-        )) + 1;
-        ChildNodeIter { inner: self, index: parent_start_index }
+        ChildNodeIter(self.parent_to_children_indices(node_num))
     }
 
     /// Checks if `lbs` satisfy the LBS's necessary and sufficient condition:
@@ -145,26 +143,42 @@ impl Louds {
 impl<'a> Iterator for ChildIndexIter<'a> {
     type Item = LoudsIndex;
     fn next(&mut self) -> Option<Self::Item> {
-        if ! self.inner.lbs[self.index] {
-            None
-        } else {
-            let result = Some(LoudsIndex(self.index));
+        self.end.map(|last| self.index <= last)
+            .unwrap_or_else(||self.inner.lbs[self.index]).then(|| {
+        // self.inner.lbs[self.index].then(|| {
+            let result = LoudsIndex(self.index);
             self.index += 1;
             result
+        })
+    }
+}
+
+impl<'a> DoubleEndedIterator for ChildIndexIter<'a> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.end.is_none() {
+            let mut i = self.index;
+            while self.inner.lbs[i] {
+                i += 1;
+            }
+            self.end = Some(i - 1);
         }
+        let last = self.end.unwrap();
+        let result = (last >= self.index).then_some(LoudsIndex(last));
+        self.end = Some(last - 1);
+        result
     }
 }
 
 impl<'a> Iterator for ChildNodeIter<'a> {
     type Item = LoudsNodeNum;
     fn next(&mut self) -> Option<Self::Item> {
-        if ! self.inner.lbs[self.index] {
-            None
-        } else {
-            let result = Some(self.inner.index_to_node_num(LoudsIndex(self.index)));
-            self.index += 1;
-            result
-        }
+        self.0.next().map(|index| self.0.inner.index_to_node_num(index))
+    }
+}
+
+impl<'a> DoubleEndedIterator for ChildNodeIter<'a> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0.next_back().map(|index| self.0.inner.index_to_node_num(index))
     }
 }
 
@@ -493,6 +507,132 @@ mod parent_to_children_success_tests {
                 let louds = Louds::from(in_s);
                 let children: Vec<_> = louds.parent_to_children(LoudsNodeNum(node_num));
                 assert_eq!(children, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, vec!()),
+
+        t2_1: ("10_10_0", 1, vec!(2)),
+        t2_2: ("10_10_0", 2, vec!()),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, vec!(2, 3, 4)),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, vec!(6)),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, vec!()),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, vec!(9, 10, 11)),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, vec!()),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, vec!()),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, vec!(15)),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, vec!(17, 18)),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!()),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
+    }
+
+}
+
+#[cfg(test)]
+mod parent_to_children_indices_success_tests {
+    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_children) = $value;
+                let louds = Louds::from(in_s);
+                let children: Vec<_> = louds.parent_to_children_indices(LoudsNodeNum(node_num)).collect();
+                assert_eq!(children, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, vec!()),
+
+        t2_1: ("10_10_0", 1, vec!(2)),
+        t2_2: ("10_10_0", 2, vec!()),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, vec!(2, 3, 4)),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, vec!(6)),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, vec!()),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, vec!(9, 10, 11)),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, vec!()),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, vec!()),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, vec!(15)),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, vec!(17, 18)),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!()),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
+    }
+
+}
+
+#[cfg(test)]
+mod parent_to_children_indices_rev_success_tests {
+    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_children) = $value;
+                let louds = Louds::from(in_s);
+                let children: Vec<_> = louds.parent_to_children_indices(LoudsNodeNum(node_num)).rev().collect();
+                assert_eq!(children, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, vec!()),
+
+        t2_1: ("10_10_0", 1, vec!(2)),
+        t2_2: ("10_10_0", 2, vec!()),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, vec!(4, 3, 2)),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, vec!(6)),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, vec!()),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, vec!(11, 10, 9)),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, vec!()),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, vec!()),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, vec!(15)),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, vec!(18, 17)),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!()),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
+    }
+
+}
+
+#[cfg(test)]
+mod parent_to_children_indices_next_back_success_tests {
+    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_children) = $value;
+                let louds = Louds::from(in_s);
+                let mut front = Vec::new();
+                let mut back = Vec::new();
+                let mut iter = louds.parent_to_children_indices(LoudsNodeNum(node_num));
+                while let Some(x) = iter.next() {
+                    front.push(x);
+                    if let Some(y) = iter.next_back() {
+                        back.push(y);
+                    }
+                }
+                front.extend(back.into_iter().rev());
+                assert_eq!(front, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
             }
         )*
         }
