@@ -140,5 +140,5 @@
 //!
 //! (`node_num_to_index()` and `child_to_parent()` use [Fid::select()](https://laysakura.github.io/fid-rs/fid_rs/fid/struct.Fid.html#method.select). `index_to_node_num()` and `parent_to_children()` use [rank()](https://laysakura.github.io/fid-rs/fid_rs/fid/struct.Fid.html#method.rank)). `parent_to_children_nodes()` has the same time complexity as `parent_to_children_indices()`.
 
-pub use louds::{Louds, LoudsIndex, LoudsNodeNum, ChildIndexIter, ChildNodeIter};
+pub use louds::{ChildIndexIter, ChildNodeIter, Louds, LoudsIndex, LoudsNodeNum};
 pub mod louds;

@@ -1,4 +1,4 @@
-use super::{Louds, LoudsIndex, LoudsNodeNum, ChildIndexIter, ChildNodeIter};
+use super::{ChildIndexIter, ChildNodeIter, Louds, LoudsIndex, LoudsNodeNum};
 use fid_rs::Fid;
 
 impl From<&str> for Louds {
@@ -51,10 +51,10 @@ impl Louds {
     pub fn node_num_to_index(&self, node_num: LoudsNodeNum) -> LoudsIndex {
         assert!(node_num.0 > 0);
 
-        let index = self.lbs.select(node_num.0).unwrap_or_else(|| panic!(
-            "NodeNum({}) does not exist in this LOUDS",
-            node_num.0,
-        ));
+        let index = self
+            .lbs
+            .select(node_num.0)
+            .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", node_num.0,));
         LoudsIndex(index)
     }
 
@@ -89,11 +89,16 @@ impl Louds {
     pub fn parent_to_children_indices(&self, node_num: LoudsNodeNum) -> ChildIndexIter {
         assert!(node_num.0 > 0);
 
-        let parent_start_index = self.lbs.select0(node_num.0).unwrap_or_else(|| panic!(
-            "NodeNum({}) does not exist in this LOUDS",
-            node_num.0,
-        )) + 1;
-        ChildIndexIter { inner: self, index: parent_start_index, end: None }
+        let parent_start_index = self
+            .lbs
+            .select0(node_num.0)
+            .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", node_num.0,))
+            + 1;
+        ChildIndexIter {
+            inner: self,
+            index: parent_start_index,
+            end: None,
+        }
     }
 
     /// # Panics
@@ -139,13 +144,15 @@ impl Louds {
 impl<'a> Iterator for ChildIndexIter<'a> {
     type Item = LoudsIndex;
     fn next(&mut self) -> Option<Self::Item> {
-        self.end.map(|last| self.index <= last)
-            .unwrap_or_else(||self.inner.lbs[self.index]).then(|| {
-        // self.inner.lbs[self.index].then(|| {
-            let result = LoudsIndex(self.index);
-            self.index += 1;
-            result
-        })
+        self.end
+            .map(|last| self.index <= last)
+            .unwrap_or_else(|| self.inner.lbs[self.index])
+            .then(|| {
+                // self.inner.lbs[self.index].then(|| {
+                let result = LoudsIndex(self.index);
+                self.index += 1;
+                result
+            })
     }
 }
 
@@ -168,13 +175,17 @@ impl<'a> DoubleEndedIterator for ChildIndexIter<'a> {
 impl<'a> Iterator for ChildNodeIter<'a> {
     type Item = LoudsNodeNum;
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|index| self.0.inner.index_to_node_num(index))
+        self.0
+            .next()
+            .map(|index| self.0.inner.index_to_node_num(index))
     }
 }
 
 impl<'a> DoubleEndedIterator for ChildNodeIter<'a> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.0.next_back().map(|index| self.0.inner.index_to_node_num(index))
+        self.0
+            .next_back()
+            .map(|index| self.0.inner.index_to_node_num(index))
     }
 }
 
@@ -276,7 +287,6 @@ mod node_num_to_index_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, 17),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, 18),
     }
-
 }
 
 #[cfg(test)]
@@ -345,7 +355,6 @@ mod index_to_node_num_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 17, 10),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 18, 11),
     }
-
 }
 
 #[cfg(test)]
@@ -526,7 +535,6 @@ mod parent_to_children_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
     }
-
 }
 
 #[cfg(test)]
@@ -565,7 +573,6 @@ mod parent_to_children_indices_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
     }
-
 }
 
 #[cfg(test)]
@@ -604,7 +611,6 @@ mod parent_to_children_indices_rev_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
     }
-
 }
 
 #[cfg(test)]
@@ -652,7 +658,6 @@ mod parent_to_children_indices_next_back_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
     }
-
 }
 
 #[cfg(test)]
