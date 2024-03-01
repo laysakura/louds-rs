@@ -93,10 +93,6 @@ impl Louds {
             "NodeNum({}) does not exist in this LOUDS",
             node_num.0,
         )) + 1;
-        // let parent_end_index = self.lbs.select0(node_num.0 + 1).unwrap_or_else(|| panic!(
-        //     "NodeNum({}) does not exist in this LOUDS",
-        //     node_num.0 + 1,
-        // )) - 1;
         ChildIndexIter { inner: self, index: parent_start_index, end: None }
     }
 
