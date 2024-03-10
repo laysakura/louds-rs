@@ -89,14 +89,10 @@ impl Louds {
     pub fn parent_to_children_indices(&self, node_num: LoudsNodeNum) -> ChildIndexIter {
         assert!(node_num.0 > 0);
 
-        let parent_start_index = self
-            .lbs
-            .select0(node_num.0)
-            .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", node_num.0,))
-            + 1;
         ChildIndexIter {
             inner: self,
-            index: parent_start_index,
+            node: node_num,
+            start: None,
             end: None,
         }
     }
@@ -143,37 +139,52 @@ impl Louds {
 
 impl<'a> Iterator for ChildIndexIter<'a> {
     type Item = LoudsIndex;
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
+        if self.start.is_none() {
+            self.start = Some(self
+                              .inner
+                .lbs
+                .select0(self.node.0)
+                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0,))
+                + 1);
+        }
+        let start = self.start.unwrap();
         self.end
-            .map(|last| self.index <= last)
-            .unwrap_or_else(|| self.inner.lbs[self.index])
+            .map(|last| start <= last)
+            .unwrap_or_else(|| self.inner.lbs[start])
             .then(|| {
-                // self.inner.lbs[self.index].then(|| {
-                let result = LoudsIndex(self.index);
-                self.index += 1;
-                result
+                self.start = Some(start + 1);
+                LoudsIndex(start)
             })
     }
 }
 
 impl<'a> DoubleEndedIterator for ChildIndexIter<'a> {
+    #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.end.is_none() {
-            let mut i = self.index;
-            while self.inner.lbs[i] {
-                i += 1;
-            }
-            self.end = Some(i - 1);
+            self.end = Some(self
+                              .inner
+                .lbs
+                .select0(self.node.0 + 1)
+                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0 + 1,))
+                - 1);
         }
-        let last = self.end.unwrap();
-        let result = (last >= self.index).then_some(LoudsIndex(last));
-        self.end = Some(last - 1);
-        result
+        let end = self.end.unwrap();
+        self.start
+            .map(|first| first <= end)
+            .unwrap_or_else(|| self.inner.lbs[end])
+            .then(|| {
+                self.end = Some(end - 1);
+                LoudsIndex(end)
+            })
     }
 }
 
 impl<'a> Iterator for ChildNodeIter<'a> {
     type Item = LoudsNodeNum;
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.0
             .next()
@@ -182,6 +193,7 @@ impl<'a> Iterator for ChildNodeIter<'a> {
 }
 
 impl<'a> DoubleEndedIterator for ChildNodeIter<'a> {
+    #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.0
             .next_back()

@@ -24,7 +24,8 @@ pub struct LoudsIndex(pub u64);
 /// An index iterator.
 pub struct ChildIndexIter<'a> {
     inner: &'a Louds,
-    index: u64,
+    node: LoudsNodeNum,
+    start: Option<u64>,
     end: Option<u64>,
 }
 /// A node iterator.
