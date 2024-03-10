@@ -137,6 +137,44 @@ impl Louds {
     }
 }
 
+impl<'a> ChildIndexIter<'a> {
+    /// Return the length of the iterator.
+    ///
+    /// It costs _O(log N)_ if the iterator has not had `.next()` and
+    /// `.next_back()` called.
+    ///
+    /// Question: Why not implement [std::iter::ExactSizeIterator]? One could
+    /// but they'd be required to do it one of two ways because its signature is
+    /// `fn len(&self) -> usize`; `&self` is not mutable:
+    ///
+    /// 1. Use interior mutability in [ChildIndexIter]. This was attempted with
+    /// a [std::cell::RefCell] but it hurt performance slightly.
+    ///
+    /// 2. Initialize [ChildIndexIter] with the start and end. However
+    ///    initializing start and end costs _O(log N)_ each.
+    pub fn len(&mut self) -> usize {
+        if self.start.is_none() {
+            self.start = Some(self
+                              .inner
+                .lbs
+                .select0(self.node.0)
+                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0,))
+                + 1);
+        }
+        if self.end.is_none() {
+            self.end = Some(self
+                              .inner
+                .lbs
+                .select0(self.node.0 + 1)
+                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0 + 1,))
+                - 1);
+        }
+        let start = self.start.unwrap();
+        let end = self.end.unwrap();
+        (end + 1 - start) as usize
+    }
+}
+
 impl<'a> Iterator for ChildIndexIter<'a> {
     type Item = LoudsIndex;
     #[inline]
@@ -198,6 +236,13 @@ impl<'a> DoubleEndedIterator for ChildNodeIter<'a> {
         self.0
             .next_back()
             .map(|index| self.0.inner.index_to_node_num(index))
+    }
+}
+
+impl<'a> ChildNodeIter<'a> {
+    /// See [ChildIndexIter::len].
+    pub fn len(&mut self) -> usize {
+        self.0.len()
     }
 }
 
@@ -622,6 +667,44 @@ mod parent_to_children_indices_rev_success_tests {
         t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!()),
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
+    }
+}
+
+#[cfg(test)]
+mod parent_to_children_indices_len_success_tests {
+    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_size) = $value;
+                let louds = Louds::from(in_s);
+                let mut iter = louds.parent_to_children_indices(LoudsNodeNum(node_num));
+                assert_eq!(iter.len(), expected_size);
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, 0),
+
+        t2_1: ("10_10_0", 1, 1),
+        t2_2: ("10_10_0", 2, 0),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, 3),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, 1),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, 0),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, 3),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, 0),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, 0),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, 1),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, 2),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, 0),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, 0),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, 0),
     }
 }
 
