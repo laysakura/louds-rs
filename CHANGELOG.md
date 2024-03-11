@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v0.5.0] - 2024-03-11
+### Added
+
+- Index and node iterators [#10](https://github.com/laysakura/louds-rs/pull/10)
+
+### Changed
+
+
 ## [v0.4.0] - 2019-05-02
 ### Changed
 - `Louds::node_num_to_index()` takes `LoudsNodeNum` instead of its reference.
@@ -29,7 +37,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.1.0] - 2019-04-26
 Initial release.
 
-[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.5.0...HEAD
+[v0.5.0]: https://github.com/laysakura/louds-rs/compare/v0.4.0...HEAD
 [v0.4.0]: https://github.com/laysakura/louds-rs/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/laysakura/louds-rs/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/laysakura/louds-rs/compare/v0.1.1...v0.2.0
