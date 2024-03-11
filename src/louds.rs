@@ -20,3 +20,13 @@ pub struct LoudsNodeNum(pub u64);
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 /// Index of [Louds](struct.Louds.html) tree.
 pub struct LoudsIndex(pub u64);
+
+/// An index iterator.
+pub struct ChildIndexIter<'a> {
+    inner: &'a Louds,
+    node: LoudsNodeNum,
+    start: Option<u64>,
+    end: Option<u64>,
+}
+/// A node iterator.
+pub struct ChildNodeIter<'a>(ChildIndexIter<'a>);

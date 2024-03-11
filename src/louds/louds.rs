@@ -1,4 +1,4 @@
-use super::{Louds, LoudsIndex, LoudsNodeNum};
+use super::{ChildIndexIter, ChildNodeIter, Louds, LoudsIndex, LoudsNodeNum};
 use fid_rs::Fid;
 
 impl From<&str> for Louds {
@@ -51,10 +51,10 @@ impl Louds {
     pub fn node_num_to_index(&self, node_num: LoudsNodeNum) -> LoudsIndex {
         assert!(node_num.0 > 0);
 
-        let index = self.lbs.select(node_num.0).expect(&format!(
-            "NodeNum({}) does not exist in this LOUDS",
-            node_num.0,
-        ));
+        let index = self
+            .lbs
+            .select(node_num.0)
+            .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", node_num.0,));
         LoudsIndex(index)
     }
 
@@ -81,25 +81,26 @@ impl Louds {
     /// # Panics
     /// `node_num` does not exist in this LOUDS.
     pub fn parent_to_children(&self, node_num: LoudsNodeNum) -> Vec<LoudsIndex> {
+        self.parent_to_children_indices(node_num).collect()
+    }
+
+    /// # Panics
+    /// `node_num` does not exist in this LOUDS.
+    pub fn parent_to_children_indices(&self, node_num: LoudsNodeNum) -> ChildIndexIter {
         assert!(node_num.0 > 0);
 
-        let parent_start_index = self.lbs.select0(node_num.0).expect(&format!(
-            "NodeNum({}) does not exist in this LOUDS",
-            node_num.0,
-        )) + 1;
-
-        let mut children_index: Vec<u64> = vec![];
-        let mut i = parent_start_index;
-        loop {
-            if self.lbs[i] == false {
-                break;
-            } else {
-                children_index.push(i);
-            }
-            i += 1;
+        ChildIndexIter {
+            inner: self,
+            node: node_num,
+            start: None,
+            end: None,
         }
+    }
 
-        children_index.iter().map(|i| LoudsIndex(*i)).collect()
+    /// # Panics
+    /// `node_num` does not exist in this LOUDS.
+    pub fn parent_to_children_nodes(&self, node_num: LoudsNodeNum) -> ChildNodeIter {
+        ChildNodeIter(self.parent_to_children_indices(node_num))
     }
 
     /// Checks if `lbs` satisfy the LBS's necessary and sufficient condition:
@@ -133,6 +134,115 @@ impl Louds {
             "LBS[index={:?}] must be '1'",
             index,
         );
+    }
+}
+
+impl<'a> ChildIndexIter<'a> {
+    /// Return the length of the iterator.
+    ///
+    /// It costs _O(log N)_ if the iterator has not had `.next()` and
+    /// `.next_back()` called.
+    ///
+    /// Question: Why not implement [std::iter::ExactSizeIterator]? One could
+    /// but they'd be required to do it one of two ways because its signature is
+    /// `fn len(&self) -> usize`; `&self` is not mutable:
+    ///
+    /// 1. Use interior mutability in [ChildIndexIter]. This was attempted with
+    /// a [std::cell::RefCell] but it hurt performance slightly.
+    ///
+    /// 2. Initialize [ChildIndexIter] with the start and end. However
+    ///    initializing start and end costs _O(log N)_ each.
+    pub fn len(&mut self) -> usize {
+        if self.start.is_none() {
+            self.start = Some(self
+                              .inner
+                .lbs
+                .select0(self.node.0)
+                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0,))
+                + 1);
+        }
+        if self.end.is_none() {
+            self.end = Some(self
+                              .inner
+                .lbs
+                .select0(self.node.0 + 1)
+                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0 + 1,))
+                - 1);
+        }
+        let start = self.start.unwrap();
+        let end = self.end.unwrap();
+        (end + 1 - start) as usize
+    }
+}
+
+impl<'a> Iterator for ChildIndexIter<'a> {
+    type Item = LoudsIndex;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.start.is_none() {
+            self.start = Some(self
+                              .inner
+                .lbs
+                .select0(self.node.0)
+                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0,))
+                + 1);
+        }
+        let start = self.start.unwrap();
+        self.end
+            .map(|last| start <= last)
+            .unwrap_or_else(|| self.inner.lbs[start])
+            .then(|| {
+                self.start = Some(start + 1);
+                LoudsIndex(start)
+            })
+    }
+}
+
+impl<'a> DoubleEndedIterator for ChildIndexIter<'a> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.end.is_none() {
+            self.end = Some(self
+                              .inner
+                .lbs
+                .select0(self.node.0 + 1)
+                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0 + 1,))
+                - 1);
+        }
+        let end = self.end.unwrap();
+        self.start
+            .map(|first| first <= end)
+            .unwrap_or_else(|| self.inner.lbs[end])
+            .then(|| {
+                self.end = Some(end - 1);
+                LoudsIndex(end)
+            })
+    }
+}
+
+impl<'a> Iterator for ChildNodeIter<'a> {
+    type Item = LoudsNodeNum;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0
+            .next()
+            .map(|index| self.0.inner.index_to_node_num(index))
+    }
+}
+
+impl<'a> DoubleEndedIterator for ChildNodeIter<'a> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0
+            .next_back()
+            .map(|index| self.0.inner.index_to_node_num(index))
+    }
+}
+
+impl<'a> ChildNodeIter<'a> {
+    /// See [ChildIndexIter::len].
+    pub fn len(&mut self) -> usize {
+        self.0.len()
     }
 }
 
@@ -234,7 +344,6 @@ mod node_num_to_index_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, 17),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, 18),
     }
-
 }
 
 #[cfg(test)]
@@ -303,7 +412,6 @@ mod index_to_node_num_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 17, 10),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 18, 11),
     }
-
 }
 
 #[cfg(test)]
@@ -459,7 +567,7 @@ mod parent_to_children_success_tests {
             fn $name() {
                 let (in_s, node_num, expected_children) = $value;
                 let louds = Louds::from(in_s);
-                let children = louds.parent_to_children(LoudsNodeNum(node_num));
+                let children: Vec<_> = louds.parent_to_children(LoudsNodeNum(node_num));
                 assert_eq!(children, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
             }
         )*
@@ -484,7 +592,167 @@ mod parent_to_children_success_tests {
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
     }
+}
 
+#[cfg(test)]
+mod parent_to_children_indices_success_tests {
+    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_children) = $value;
+                let louds = Louds::from(in_s);
+                let children: Vec<_> = louds.parent_to_children_indices(LoudsNodeNum(node_num)).collect();
+                assert_eq!(children, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, vec!()),
+
+        t2_1: ("10_10_0", 1, vec!(2)),
+        t2_2: ("10_10_0", 2, vec!()),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, vec!(2, 3, 4)),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, vec!(6)),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, vec!()),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, vec!(9, 10, 11)),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, vec!()),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, vec!()),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, vec!(15)),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, vec!(17, 18)),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!()),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
+    }
+}
+
+#[cfg(test)]
+mod parent_to_children_indices_rev_success_tests {
+    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_children) = $value;
+                let louds = Louds::from(in_s);
+                let children: Vec<_> = louds.parent_to_children_indices(LoudsNodeNum(node_num)).rev().collect();
+                assert_eq!(children, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, vec!()),
+
+        t2_1: ("10_10_0", 1, vec!(2)),
+        t2_2: ("10_10_0", 2, vec!()),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, vec!(4, 3, 2)),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, vec!(6)),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, vec!()),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, vec!(11, 10, 9)),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, vec!()),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, vec!()),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, vec!(15)),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, vec!(18, 17)),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!()),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
+    }
+}
+
+#[cfg(test)]
+mod parent_to_children_indices_len_success_tests {
+    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_size) = $value;
+                let louds = Louds::from(in_s);
+                let mut iter = louds.parent_to_children_indices(LoudsNodeNum(node_num));
+                assert_eq!(iter.len(), expected_size);
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, 0),
+
+        t2_1: ("10_10_0", 1, 1),
+        t2_2: ("10_10_0", 2, 0),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, 3),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, 1),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, 0),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, 3),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, 0),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, 0),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, 1),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, 2),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, 0),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, 0),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, 0),
+    }
+}
+
+#[cfg(test)]
+mod parent_to_children_indices_next_back_success_tests {
+    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_children) = $value;
+                let louds = Louds::from(in_s);
+                let mut front = Vec::new();
+                let mut back = Vec::new();
+                let mut iter = louds.parent_to_children_indices(LoudsNodeNum(node_num));
+                while let Some(x) = iter.next() {
+                    front.push(x);
+                    if let Some(y) = iter.next_back() {
+                        back.push(y);
+                    }
+                }
+                front.extend(back.into_iter().rev());
+                assert_eq!(front, expected_children.iter().map(|c| LoudsIndex(*c)).collect::<Vec<LoudsIndex>>());
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, vec!()),
+
+        t2_1: ("10_10_0", 1, vec!(2)),
+        t2_2: ("10_10_0", 2, vec!()),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, vec!(2, 3, 4)),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, vec!(6)),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, vec!()),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, vec!(9, 10, 11)),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, vec!()),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, vec!()),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, vec!(15)),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, vec!(17, 18)),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!()),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
+    }
 }
 
 #[cfg(test)]
@@ -499,7 +767,7 @@ mod parent_to_children_failure_tests {
             fn $name() {
                 let (in_s, node_num) = $value;
                 let louds = Louds::from(in_s);
-                let _ = louds.parent_to_children(LoudsNodeNum(node_num));
+                let _: Vec<_> = louds.parent_to_children(LoudsNodeNum(node_num));
             }
         )*
         }
