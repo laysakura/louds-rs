@@ -136,9 +136,9 @@ When the number of nodes in the tree represented as LOUDS is _N_:
 | [`index_to_node_num()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.index_to_node_num) | _O(1)_ | _O(1)_ |
 | [`child_to_parent()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.child_to_parent) | _O(1)_ | _O(1)_ |
 | [`parent_to_children()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O( max(log N, <u>max num of children a node has</u>) )_ | _O( max(log N, <u>max num of children a node has</u>) )_ |
-| [`parent_to_children_indices()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O(log N)_ | _O( 1 )_ |
-| [`parent_to_children_indices().next()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O(1)_ | _O( 0 )_ |
-| [`parent_to_children_indices().next_back()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O(<u>max num of children a node has</u> )_ on first call _O(1)_ on next | _O( 0 )_ |
+| [`parent_to_children_indices()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O(1)_ | _O( 1 )_ |
+| [`parent_to_children_indices().next()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O(log N)_ at first then _O(1)_ | _O( 0 )_ |
+| [`parent_to_children_indices().next_back()`](https://laysakura.github.io/louds-rs/louds_rs/louds/struct.Louds.html#method.parent_to_children) | _O(log N)_ at first then _O(1)_ | _O( 0 )_ |
 
 (`node_num_to_index()` and `child_to_parent()` use [Fid::select()](https://laysakura.github.io/fid-rs/fid_rs/fid/struct.Fid.html#method.select). `index_to_node_num()` and `parent_to_children()` use [rank()](https://laysakura.github.io/fid-rs/fid_rs/fid/struct.Fid.html#method.rank)). `parent_to_children_nodes()` has the same time complexity as `parent_to_children_indices()`.
 
