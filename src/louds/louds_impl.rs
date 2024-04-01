@@ -154,20 +154,18 @@ impl<'a> ChildIndexIter<'a> {
     ///    initializing start and end costs _O(log N)_ each.
     pub fn len(&mut self) -> usize {
         if self.start.is_none() {
-            self.start = Some(self
-                              .inner
-                .lbs
-                .select0(self.node.0)
-                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0,))
-                + 1);
+            self.start = Some(
+                self.inner.lbs.select0(self.node.0).unwrap_or_else(|| {
+                    panic!("NodeNum({}) does not exist in this LOUDS", self.node.0,)
+                }) + 1,
+            );
         }
         if self.end.is_none() {
-            self.end = Some(self
-                              .inner
-                .lbs
-                .select0(self.node.0 + 1)
-                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0 + 1,))
-                - 1);
+            self.end = Some(
+                self.inner.lbs.select0(self.node.0 + 1).unwrap_or_else(|| {
+                    panic!("NodeNum({}) does not exist in this LOUDS", self.node.0 + 1,)
+                }) - 1,
+            );
         }
         let start = self.start.unwrap();
         let end = self.end.unwrap();
@@ -180,12 +178,11 @@ impl<'a> Iterator for ChildIndexIter<'a> {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         if self.start.is_none() {
-            self.start = Some(self
-                              .inner
-                .lbs
-                .select0(self.node.0)
-                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0,))
-                + 1);
+            self.start = Some(
+                self.inner.lbs.select0(self.node.0).unwrap_or_else(|| {
+                    panic!("NodeNum({}) does not exist in this LOUDS", self.node.0,)
+                }) + 1,
+            );
         }
         let start = self.start.unwrap();
         self.end
@@ -202,12 +199,11 @@ impl<'a> DoubleEndedIterator for ChildIndexIter<'a> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.end.is_none() {
-            self.end = Some(self
-                              .inner
-                .lbs
-                .select0(self.node.0 + 1)
-                .unwrap_or_else(|| panic!("NodeNum({}) does not exist in this LOUDS", self.node.0 + 1,))
-                - 1);
+            self.end = Some(
+                self.inner.lbs.select0(self.node.0 + 1).unwrap_or_else(|| {
+                    panic!("NodeNum({}) does not exist in this LOUDS", self.node.0 + 1,)
+                }) - 1,
+            );
         }
         let end = self.end.unwrap();
         self.start
@@ -672,7 +668,7 @@ mod parent_to_children_indices_rev_success_tests {
 
 #[cfg(test)]
 mod parent_to_children_indices_len_success_tests {
-    use crate::{Louds, LoudsIndex, LoudsNodeNum};
+    use crate::{Louds, LoudsNodeNum};
 
     macro_rules! parameterized_tests {
         ($($name:ident: $value:expr,)*) => {

@@ -29,7 +29,7 @@ louds-rs = "0.1"  # NOTE: Replace to latest minor version.
 ### Usage Overview
 Say we want to hold the following tree structure in minimum length of bits.
 
-```
+```plaintext
 (1)
  |
  |---+---+
@@ -48,7 +48,7 @@ Say we want to hold the following tree structure in minimum length of bits.
 This tree has NodeNum (node number of 1-origin, assigned from left node to right & top to bottom) and edges.
 With LOUDS, this tree is represented as the following LBS (LOUDS Bit String).
 
-```
+```plaintext
 NodeNum       | 0 (virtual root) | 1          | 2    | 3 | 4          | 5 | 6 | 7    | 8       | 9 | 10 | 11 |
 LBS           | 1  0             | 1  1  1  0 | 1  0 | 0 | 1  1  1  0 | 0 | 0 | 1  0 | 1  1  0 | 0 | 0  | 0  |
 Child NodeNum | 1  -             | 2  3  4  - | 5  - | - | 6  7  8  - | - | - | 9  - | 10 11 - | - | -  | -  |
@@ -57,7 +57,7 @@ Index         | 0  1             | 2  3  4  5 | 6  7 | 8 | 9  10 11 12| 13| 14| 
 
 The same tree is represented as follows using index.
 
-```
+```plaintext
 <0>
  |
  |---+---+
