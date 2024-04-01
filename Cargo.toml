@@ -18,6 +18,7 @@ edition = "2018"
 # fid-rs = "0.1"
 fid-rs = { git = "https://github.com/LucaCappelletti94/fid-rs", branch = "master", no-default-features = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
+mem_dbg = {version = "0.1.4", optional = true}
 
 [dev-dependencies]
 criterion = "0.2"
@@ -33,3 +34,4 @@ tag-prefix = "v"
 [features]
 serde = ["fid-rs/serde", "dep:serde"]
 rayon = ["fid-rs/rayon"]
+mem_dbg = ["dep:mem_dbg", "fid-rs/mem_dbg"]
