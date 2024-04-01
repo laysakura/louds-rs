@@ -10,7 +10,8 @@ High performance LOUDS (Level-Order Unary Degree Sequence) library.
 |
 [Changelog](https://github.com/laysakura/louds-rs/blob/master/CHANGELOG.md)
 
-[![Build Status](https://travis-ci.com/laysakura/louds-rs.svg?branch=master)](https://travis-ci.com/laysakura/louds-rs)
+[![GitHub Actions Status](https://github.com/laysakura/louds-rs/actions/workflows/clippy.yml/badge.svg)](https://github.com/laysakura/louds-rs/actions)
+[![Travis Status](https://travis-ci.com/laysakura/louds-rs.svg?branch=master)](https://travis-ci.com/laysakura/louds-rs)
 [![Crates.io Version](https://img.shields.io/crates/v/louds-rs.svg)](https://crates.io/crates/louds-rs)
 [![Crates.io Downloads](https://img.shields.io/crates/d/louds-rs.svg)](https://crates.io/crates/louds-rs)
 [![Minimum rustc version](https://img.shields.io/badge/rustc-1.33+-lightgray.svg)](https://github.com/laysakura/louds-rs#rust-version-supports)

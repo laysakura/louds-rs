@@ -105,8 +105,8 @@ impl Louds {
 
     /// Checks if `lbs` satisfy the LBS's necessary and sufficient condition:
     fn validate_lbs(lbs: &Fid) {
-        assert_eq!(lbs[0], true);
-        assert_eq!(lbs[1], false);
+        assert!(lbs[0]);
+        assert!(!lbs[1]);
 
         let (mut cnt0, mut cnt1) = (0u64, 0u64);
         for (i, bit) in lbs.iter().enumerate() {
@@ -129,8 +129,8 @@ impl Louds {
     /// # Panics
     /// `index` does not point to any node in this LOUDS.
     fn validate_index(&self, index: LoudsIndex) {
-        assert_eq!(
-            self.lbs[index.0], true,
+        assert!(
+            self.lbs[index.0],
             "LBS[index={:?}] must be '1'",
             index,
         );
@@ -170,6 +170,11 @@ impl<'a> ChildIndexIter<'a> {
         let start = self.start.unwrap();
         let end = self.end.unwrap();
         (end + 1 - start) as usize
+    }
+
+    /// Returns whether the iterator is empty.
+    pub fn is_empty(&mut self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -239,6 +244,11 @@ impl<'a> ChildNodeIter<'a> {
     /// See [ChildIndexIter::len].
     pub fn len(&mut self) -> usize {
         self.0.len()
+    }
+
+    /// Returns whether the iterator is empty.
+    pub fn is_empty(&mut self) -> bool {
+        self.len() == 0
     }
 }
 
