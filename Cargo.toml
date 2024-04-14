@@ -12,11 +12,7 @@ categories = ["compression", "data-structures"]
 edition = "2018"
 
 [dependencies]
-# As soon as the newer version is made available, we should switch to it here
-# and add support for enabling/disabling the rayon and serde features. For the
-# time being, we switch to the git repository.
-# fid-rs = "0.1"
-fid-rs = { git = "https://github.com/LucaCappelletti94/fid-rs", branch = "master", no-default-features = true }
+fid-rs = "0.2.0"
 serde = { version = "1.0", features = ["derive"], optional = true }
 mem_dbg = {version = "0.1.4", optional = true}
 
