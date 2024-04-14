@@ -28,9 +28,6 @@ rand = "0.6"
 name = "bench"
 harness = false
 
-[package.metadata.release]
-tag-prefix = "v"
-
 [features]
 serde = ["fid-rs/serde", "dep:serde"]
 rayon = ["fid-rs/rayon"]
