@@ -9,6 +9,7 @@ use fid_rs::Fid;
 ///
 /// In fact, _N_ (number of nodes in the tree) is designed to be limited to: _N < 2^64 / 2_, while each node is represented in 2bits in average.<br>
 /// It should be enough for almost all usecases since a binary data of length of _2^63_ consumes _2^20 = 1,048,576_ TB (terabytes), which is hard to handle by state-of-the-art computer architecture.
+#[derive(Clone)]
 pub struct Louds {
     lbs: Fid,
 }
