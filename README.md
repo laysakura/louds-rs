@@ -10,7 +10,8 @@ High performance LOUDS (Level-Order Unary Degree Sequence) library.
 |
 [Changelog](https://github.com/laysakura/louds-rs/blob/master/CHANGELOG.md)
 
-[![Build Status](https://travis-ci.com/laysakura/louds-rs.svg?branch=master)](https://travis-ci.com/laysakura/louds-rs)
+[![GitHub Actions Status](https://github.com/laysakura/louds-rs/actions/workflows/clippy.yml/badge.svg)](https://github.com/laysakura/louds-rs/actions)
+[![Travis Status](https://travis-ci.com/laysakura/louds-rs.svg?branch=master)](https://travis-ci.com/laysakura/louds-rs)
 [![Crates.io Version](https://img.shields.io/crates/v/louds-rs.svg)](https://crates.io/crates/louds-rs)
 [![Crates.io Downloads](https://img.shields.io/crates/d/louds-rs.svg)](https://crates.io/crates/louds-rs)
 [![Minimum rustc version](https://img.shields.io/badge/rustc-1.33+-lightgray.svg)](https://github.com/laysakura/louds-rs#rust-version-supports)
@@ -29,7 +30,7 @@ louds-rs = "0.1"  # NOTE: Replace to latest minor version.
 ### Usage Overview
 Say we want to hold the following tree structure in minimum length of bits.
 
-```
+```plaintext
 (1)
  |
  |---+---+
@@ -48,7 +49,7 @@ Say we want to hold the following tree structure in minimum length of bits.
 This tree has NodeNum (node number of 1-origin, assigned from left node to right & top to bottom) and edges.
 With LOUDS, this tree is represented as the following LBS (LOUDS Bit String).
 
-```
+```plaintext
 NodeNum       | 0 (virtual root) | 1          | 2    | 3 | 4          | 5 | 6 | 7    | 8       | 9 | 10 | 11 |
 LBS           | 1  0             | 1  1  1  0 | 1  0 | 0 | 1  1  1  0 | 0 | 0 | 1  0 | 1  1  0 | 0 | 0  | 0  |
 Child NodeNum | 1  -             | 2  3  4  - | 5  - | - | 6  7  8  - | - | - | 9  - | 10 11 - | - | -  | -  |
@@ -57,7 +58,7 @@ Index         | 0  1             | 2  3  4  5 | 6  7 | 8 | 9  10 11 12| 13| 14| 
 
 The same tree is represented as follows using index.
 
-```
+```plaintext
 <0>
  |
  |---+---+
