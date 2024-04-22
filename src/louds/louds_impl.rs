@@ -243,7 +243,7 @@ impl<'a> Iterator for AncestorNodeIter<'a> {
     type Item = LoudsNodeNum;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.node.0 == 0 {
+        if self.node.0 <= 1 {
             None
         } else {
             let result = self.node;
