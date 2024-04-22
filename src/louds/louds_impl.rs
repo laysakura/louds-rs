@@ -78,10 +78,11 @@ impl Louds {
         LoudsNodeNum(parent_node_num)
     }
 
-    pub fn child_to_ancestors(&self, node_num: LoudsNodeNum) -> AncestorNodeIter {
+    /// Return an iterator to the `child` and its ancestors' node numbers.
+    pub fn child_to_ancestors(&self, child: LoudsNodeNum) -> AncestorNodeIter {
         AncestorNodeIter {
             inner: self,
-            node: node_num,
+            node: child,
         }
     }
 
@@ -242,12 +243,12 @@ impl<'a> Iterator for AncestorNodeIter<'a> {
     type Item = LoudsNodeNum;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-
         if self.node.0 == 0 {
             None
         } else {
             let result = self.node;
-            self.node = LoudsNodeNum(self.inner.lbs.rank0(result.0));
+            let index = self.inner.node_num_to_index(self.node);
+            self.node = LoudsNodeNum(self.inner.lbs.rank0(index.0));
             Some(result)
         }
     }
