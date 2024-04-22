@@ -45,3 +45,8 @@ pub struct ChildIndexIter<'a> {
 }
 /// A node iterator.
 pub struct ChildNodeIter<'a>(ChildIndexIter<'a>);
+
+pub struct AncestorNodeIter<'a> {
+    inner: &'a Louds,
+    node: LoudsNodeNum,
+}

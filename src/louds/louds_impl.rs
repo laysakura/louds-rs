@@ -1,4 +1,4 @@
-use super::{ChildIndexIter, ChildNodeIter, Louds, LoudsIndex, LoudsNodeNum};
+use super::{ChildIndexIter, ChildNodeIter, Louds, LoudsIndex, LoudsNodeNum, AncestorNodeIter};
 use fid_rs::Fid;
 
 impl From<&str> for Louds {
@@ -76,6 +76,13 @@ impl Louds {
 
         let parent_node_num = self.lbs.rank0(index.0);
         LoudsNodeNum(parent_node_num)
+    }
+
+    pub fn child_to_ancestors(&self, node_num: LoudsNodeNum) -> AncestorNodeIter {
+        AncestorNodeIter {
+            inner: self,
+            node: node_num,
+        }
     }
 
     /// # Panics
@@ -228,6 +235,21 @@ impl<'a> Iterator for ChildNodeIter<'a> {
         self.0
             .next()
             .map(|index| self.0.inner.index_to_node_num(index))
+    }
+}
+
+impl<'a> Iterator for AncestorNodeIter<'a> {
+    type Item = LoudsNodeNum;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+
+        if self.node.0 == 0 {
+            None
+        } else {
+            let result = self.node;
+            self.node = LoudsNodeNum(self.inner.lbs.rank0(result.0));
+            Some(result)
+        }
     }
 }
 
