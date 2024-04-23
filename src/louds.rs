@@ -26,26 +26,27 @@ pub struct Louds {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "mem_dbg", derive(MemDbg, MemSize))]
 #[repr(transparent)]
-/// Node number of [Louds](struct.Louds.html) tree.
+/// Node number of [Louds](struct.Louds.html) tree
 pub struct LoudsNodeNum(pub u64);
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "mem_dbg", derive(MemDbg, MemSize))]
 #[repr(transparent)]
-/// Index of [Louds](struct.Louds.html) tree.
+/// Index of [Louds](struct.Louds.html) tree
 pub struct LoudsIndex(pub u64);
 
-/// An index iterator.
+/// An index iterator
 pub struct ChildIndexIter<'a> {
     inner: &'a Louds,
     node: LoudsNodeNum,
     start: Option<u64>,
     end: Option<u64>,
 }
-/// A node iterator.
+/// A node iterator
 pub struct ChildNodeIter<'a>(ChildIndexIter<'a>);
 
+/// An ancestor node iterator
 pub struct AncestorNodeIter<'a> {
     inner: &'a Louds,
     node: LoudsNodeNum,
