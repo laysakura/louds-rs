@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v0.7.0] - 2024-04-30
+
+### Added
+
+- Child to ancestors iterator ([#14](https://github.com/laysakura/louds-rs/pull/14))
+
 ## [v0.6.0] - 2024-04-15
 
 ### Added
@@ -42,7 +48,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.1.0] - 2019-04-26
 Initial release.
 
-[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/laysakura/louds-rs/compare/v0.7.0...HEAD
+[v0.7.0]: https://github.com/laysakura/louds-rs/compare/v0.6.0...v0.7.0
 [v0.6.0]: https://github.com/laysakura/louds-rs/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/laysakura/louds-rs/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/laysakura/louds-rs/compare/v0.3.0...v0.4.0
