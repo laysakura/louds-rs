@@ -1,4 +1,4 @@
-use super::{ChildIndexIter, ChildNodeIter, Louds, LoudsIndex, LoudsNodeNum};
+use super::{ChildIndexIter, ChildNodeIter, Louds, LoudsIndex, LoudsNodeNum, AncestorNodeIter};
 use fid_rs::Fid;
 
 impl From<&str> for Louds {
@@ -76,6 +76,14 @@ impl Louds {
 
         let parent_node_num = self.lbs.rank0(index.0);
         LoudsNodeNum(parent_node_num)
+    }
+
+    /// Return an iterator to the `child` and its ancestors' node numbers.
+    pub fn child_to_ancestors(&self, child: LoudsNodeNum) -> AncestorNodeIter {
+        AncestorNodeIter {
+            inner: self,
+            node: child,
+        }
     }
 
     /// # Panics
@@ -228,6 +236,21 @@ impl<'a> Iterator for ChildNodeIter<'a> {
         self.0
             .next()
             .map(|index| self.0.inner.index_to_node_num(index))
+    }
+}
+
+impl<'a> Iterator for AncestorNodeIter<'a> {
+    type Item = LoudsNodeNum;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.node.0 <= 1 {
+            None
+        } else {
+            let result = self.node;
+            let index = self.inner.node_num_to_index(self.node);
+            self.node = LoudsNodeNum(self.inner.lbs.rank0(index.0));
+            Some(result)
+        }
     }
 }
 
@@ -597,6 +620,109 @@ mod parent_to_children_success_tests {
         t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!()),
         t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!()),
         t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!()),
+    }
+}
+
+#[cfg(test)]
+mod child_to_ancestors_success_tests {
+    use crate::{Louds, LoudsNodeNum};
+
+    macro_rules! parameterized_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (in_s, node_num, expected_children) = $value;
+                let louds = Louds::from(in_s);
+                let children: Vec<_> = louds.child_to_ancestors(LoudsNodeNum(node_num)).collect();
+                assert_eq!(children, expected_children.iter().map(|c| LoudsNodeNum(*c)).collect::<Vec<LoudsNodeNum>>());
+            }
+        )*
+        }
+    }
+
+    parameterized_tests! {
+        t1_1: ("10_0", 1, vec!()),
+
+        t2_1: ("10_10_0", 1, vec!()),
+        t2_2: ("10_10_0", 2, vec!(2)),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1, vec!()),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 2, vec!(2)),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 3, vec!(3)),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 4, vec!(4)),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5, vec!(5, 2)),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 6, vec!(6, 4)),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7, vec!(7, 4)),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8, vec!(8, 4)),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 9, vec!(9, 7, 4)),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 10, vec!(10, 8, 4)),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 11, vec!(11, 8, 4)),
+    }
+}
+
+#[cfg(test)]
+mod child_to_ancestors_failure_tests {
+    use crate::{Louds, LoudsIndex};
+
+    macro_rules! parameterized_index_not_point_to_node_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            #[should_panic]
+            fn $name() {
+                let (in_s, index) = $value;
+                let louds = Louds::from(in_s);
+                let node = louds.index_to_node_num(LoudsIndex(index));
+                let _ = louds.child_to_ancestors(node);
+            }
+        )*
+        }
+    }
+
+    parameterized_index_not_point_to_node_tests! {
+        t1_1: ("10_0", 1),
+        t1_2: ("10_0", 3),
+
+        t2_1: ("10_10_0", 1),
+        t2_2: ("10_10_0", 3),
+        t2_3: ("10_10_0", 4),
+        t2_4: ("10_10_0", 5),
+
+        t3_1: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 1),
+        t3_2: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 5),
+        t3_3: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 7),
+        t3_4: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 8),
+        t3_5: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 12),
+        t3_6: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 13),
+        t3_7: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 14),
+        t3_8: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 16),
+        t3_9: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 19),
+        t3_10: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 20),
+        t3_11: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 21),
+        t3_12: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 22),
+        t3_13: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 23),
+        t3_14: ("10_1110_10_0_1110_0_0_10_110_0_0_0", 24),
+    }
+
+    macro_rules! parameterized_root_not_have_parent_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            #[should_panic]
+            fn $name() {
+                let in_s = $value;
+                let louds = Louds::from(in_s);
+                let _ = louds.child_to_parent(LoudsIndex(0));
+            }
+        )*
+        }
+    }
+
+    parameterized_root_not_have_parent_tests! {
+        t1: "10_0",
+        t2: "10_10_0",
+        t3: "10_1110_10_0_1110_0_0_10_110_0_0_0",
     }
 }
 
